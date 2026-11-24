@@ -3,8 +3,7 @@
 
 import asyncio
 from pathlib import Path
-
-from pypdf import PdfReader
+import fitz
 
 from training_data_bot.core.models import Document, DocumentType
 from training_data_bot.sources.base import BaseLoader
@@ -83,28 +82,29 @@ class PDFLoader(BaseLoader):
             ) from exc
 
     def _extract_pdf_text(self, path: Path) -> str:
-        """Extract text from all pages of a PDF."""
-
-        reader = PdfReader(str(path))
-
-        if reader.is_encrypted:
-            raise DocumentLoadError(
-                "Encrypted PDFs are not supported",
-                file_path=str(path),
-            )
-
-        if len(reader.pages) > self.MAX_PAGES:
-            raise DocumentLoadError(
-                f"PDF exceeds the maximum of {self.MAX_PAGES} pages",
-                file_path=str(path),
-            )
+        """Extract text from every PDF page."""
 
         pages = []
 
-        for page in reader.pages:
-            text = page.extract_text() or ""
+        with fitz.open(str(path)) as pdf:
+            if pdf.is_encrypted:
+                raise DocumentLoadError(
+                    "Encrypted PDFs are not supported",
+                    file_path=str(path),
+                )
 
-            if text.strip():
-                pages.append(text.strip())
+            if pdf.page_count > self.MAX_PAGES:
+                raise DocumentLoadError(
+                    "PDF exceeds the maximum page count",
+                    file_path=str(path),
+                )
+
+            for page_number, page in enumerate(pdf, start=1):
+                text = page.get_text()
+
+                if text.strip():
+                    pages.append(
+                        f"Page {page_number}:\n{text}"
+                    )
 
         return "\n\n".join(pages)
