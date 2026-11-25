@@ -56,7 +56,7 @@ class TrainingDataBot:
                         "base_url",
                         "https://openrouter.ai/api/v1"
                     ),
-                    model=self.config.get("model", "openrouter/free"),
+                    model=self.config.get("model", "nvidia/nemotron-3.5-lightning:free"),
                 )
 
             self.preprocessor = TextPreprocessor(
