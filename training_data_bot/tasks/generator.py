@@ -61,8 +61,10 @@ class TaskGenerator:
             task_id=template.id,
             input_chunk_id=chunk.id,
             output=output,
+            confidence=0.0,
+            quality_scores={},
             processing_time=processing_time,
-        )
+)
 
     def create_training_example(
         self,
