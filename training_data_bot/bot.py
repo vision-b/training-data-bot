@@ -40,35 +40,49 @@ class TrainingDataBot:
         self._init_components()
         self.logger.info("TrainingDataBot initialized successfully")
 
-    def _init_components(self) -> None:
-        try:
-            if self.loader is None:
-                self.loader = UnifiedLoader()
+    
+def _init_components(self) -> None:
+    try:
+        if self.loader is None:
+            self.loader = UnifiedLoader()
 
-            # Local mock is the safe default; set use_mock_ai=False to use API.
-            if self.config.get("use_mock_ai", True):
-                self.ai_client = MockAIProvider()
-            else:
-                self.ai_client = AIClient(
-                    api_key=self.config.get("api_key"),
-                    base_url=self.config.get("base_url", "https://api.openai.com/v1"),
-                    model=self.config.get("model", "gpt-4o-mini"),
-                )
+        # Choose between mock AI and a real AI provider.
+        if self.config.get("use_mock_ai", True):
+            self.ai_client = MockAIProvider()
+        else:
+            self.ai_client = AIClient(
+                api_key=self.config.get("api_key"),
+                base_url=self.config.get(
+                    "base_url",
+                    "https://openrouter.ai/api/v1"
+                ),
+                model=self.config.get("model", "openrouter/free"),
+            )
 
-            self.preprocessor = TextPreprocessor(
-                chunk_size=self.config.get("chunk_size", 500),
-                overlap=self.config.get("chunk_overlap", 50),
+        self.preprocessor = TextPreprocessor(
+            chunk_size=self.config.get("chunk_size", 500),
+            overlap=self.config.get("chunk_overlap", 50),
+        )
+
+        self.task_manager = TaskManager(self.ai_client)
+
+        self.evaluator = QualityEvaluator(
+            pass_threshold=self.config.get("quality_threshold", 0.6)
+        )
+
+        self.exporter = DatasetExporter()
+
+        self.db_manager = DatabaseManager(
+            self.config.get(
+                "database_path",
+                "data/training_data_bot.db"
             )
-            self.task_manager = TaskManager(self.ai_client)
-            self.evaluator = QualityEvaluator(
-                pass_threshold=self.config.get("quality_threshold", 0.6)
-            )
-            self.exporter = DatasetExporter()
-            self.db_manager = DatabaseManager(
-                self.config.get("database_path", "data/training_data_bot.db")
-            )
-        except Exception as exc:
-            raise ConfigurationError("Failed to initialize TrainingDataBot components") from exc
+        )
+
+    except Exception as exc:
+        raise ConfigurationError(
+            "Failed to initialize TrainingDataBot components"
+        ) from exc
 
     async def load_documents(
         self,
