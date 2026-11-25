@@ -1,10 +1,12 @@
 
 from typing import Optional
 import os
+
 import httpx
 from dotenv import load_dotenv
 
 from training_data_bot.ai.exceptions import AIProviderError, AIResponseError
+
 
 # Load environment variables from the project's .env file
 load_dotenv()
@@ -31,6 +33,7 @@ class AIClient:
         temperature: float = 0.7,
         max_tokens: Optional[int] = None,
     ) -> str:
+
         if not prompt or not prompt.strip():
             raise ValueError("Prompt cannot be empty.")
 
@@ -42,7 +45,9 @@ class AIClient:
 
         payload = {
             "model": self.model,
-            "messages": [{"role": "user", "content": prompt}],
+            "messages": [
+                {"role": "user", "content": prompt}
+            ],
             "temperature": temperature,
         }
 
@@ -63,7 +68,41 @@ class AIClient:
                 response.raise_for_status()
                 data = response.json()
 
-            return data["choices"][0]["message"]["content"]
+        except httpx.HTTPStatusError as exc:
+            raise AIProviderError(
+                f"OpenRouter returned HTTP {exc.response.status_code}: "
+                f"{exc.response.text[:1000]}"
+            ) from exc
 
-        except (httpx.HTTPError, KeyError, IndexError, TypeError) as exc:
-            raise AIResponseError(f"AI request failed: {exc}") from exc
+        except (httpx.HTTPError, ValueError) as exc:
+            raise AIResponseError(
+                f"AI request failed: {exc}"
+            ) from exc
+
+        try:
+            choices = data.get("choices", [])
+
+            if not choices:
+                raise AIResponseError(
+                    "OpenRouter returned no choices."
+                )
+
+            message = choices[0].get("message", {})
+            content = message.get("content")
+
+            if not isinstance(content, str) or not content.strip():
+                finish_reason = choices[0].get("finish_reason")
+                message_fields = list(message.keys())
+
+                raise AIResponseError(
+                    "OpenRouter returned no text content. "
+                    f"Finish reason: {finish_reason}. "
+                    f"Message fields: {message_fields}"
+                )
+
+            return content.strip()
+
+        except (KeyError, IndexError, TypeError, AttributeError) as exc:
+            raise AIResponseError(
+                f"Unexpected OpenRouter response format: {exc}"
+            ) from exc
