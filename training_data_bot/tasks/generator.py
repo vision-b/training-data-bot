@@ -80,7 +80,8 @@ class TaskGenerator:
             task_type=template.task_type,
             source_document_id=chunk.document_id,
             source_chunk_id=chunk.id,
-        )
+            quality_scores=result.quality_scores,
+)
 
     async def generate_examples(
         self,
