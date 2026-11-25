@@ -64,6 +64,12 @@ class QualityMetric(str, Enum):
     RELEVANCE = "relevance"
 
 
+class ExportFormat(str, Enum):
+    JSON = "json"
+    JSONL = "jsonl"
+    CSV = "csv"
+
+
 class ProcessingStatus(str, Enum):
     PENDING = "pending"
     RUNNING = "running"
@@ -147,9 +153,9 @@ class Dataset(BaseEntity):
     description: str
     examples: List[TrainingExample]
     total_examples: int
-    train_split: float
-    validation_split: float
-    test_split: float
+    train_split: float = 0.8
+    validation_split: float = 0.1
+    test_split: float = 0.1
 
 
 # ============================================================
