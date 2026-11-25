@@ -1,3 +1,4 @@
+
 from typing import List
 from training_data_bot.core.models import TaskResult, TaskTemplate, TextChunk, TrainingExample, TaskType
 
@@ -42,7 +43,7 @@ class QAGenerator(_BaseTaskGenerator):
                 "Read the source text and create one useful question and its answer. "
                 "Use only information supported by the source text.\n\n{content}"
             ),
-            parameters={"temperature": 0.7, "max_tokens": 500},
+            parameters={"temperature": 0.7, "max_tokens": 1500},
         )
 
 
@@ -57,7 +58,7 @@ class ClassificationGenerator(_BaseTaskGenerator):
                 "Classify the following text. Return the category and a brief reason. "
                 "Do not invent information.\n\n{content}"
             ),
-            parameters={"temperature": 0.2, "max_tokens": 250},
+            parameters={"temperature": 0.2, "max_tokens": 1000},
         )
 
 
@@ -69,5 +70,5 @@ class SummarizationGenerator(_BaseTaskGenerator):
             task_type=TaskType.SUMMARIZATION,
             description="Create a concise summary of source text.",
             prompt_template="Summarize the following text accurately.\n\n{content}",
-            parameters={"temperature": 0.5, "max_tokens": 500},
+            parameters={"temperature": 0.5, "max_tokens": 1500},
         )
