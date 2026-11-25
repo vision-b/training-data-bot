@@ -47,3 +47,4 @@ class TextChunker:
             start = end - self.overlap
 
         return chunks
+
