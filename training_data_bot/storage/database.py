@@ -1,5 +1,6 @@
 from typing import Union
-
+import sqlite3
+from pathlib import Path
 
 class DatabaseManager:
     """Small SQLite store for dataset snapshots (assistant-designed)."""
