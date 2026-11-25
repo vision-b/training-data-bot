@@ -49,6 +49,9 @@ class AIClient:
                 {"role": "user", "content": prompt}
             ],
             "temperature": temperature,
+            "reasoning": {
+                "effort": "none"
+            },
         }
 
         if max_tokens is not None:
