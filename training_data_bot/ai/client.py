@@ -43,8 +43,9 @@ class AIClient:
                 "Check your .env file."
             )
 
+
         payload = {
-            "model": self.model,
+            "model": self.model, 
             "messages": [
                 {"role": "user", "content": prompt}
             ],
