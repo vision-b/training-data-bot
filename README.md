@@ -461,7 +461,7 @@ Before running the project, make sure you have:
 ### 1. Clone the repository
 
 ```bash
-git clone YOUR_GITHUB_REPOSITORY_URL
+git clone https://github.com/vision-b/training-data-bot
 ```
 
 Navigate into the project:
